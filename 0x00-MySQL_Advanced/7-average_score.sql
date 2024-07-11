@@ -1,6 +1,6 @@
--- Create stored procedure ComputeAverageScoreForUser
--- computes and stores average score for a student
--- Takes 1 input user_id, a users.id
+-- Creating stored procedure ComputeAverageScoreForUser
+-- and it computes and stores average score for a student
+-- 1 input user_id, a users.id
 
 DELIMITER $$
 
