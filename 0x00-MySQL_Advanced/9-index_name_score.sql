@@ -1,7 +1,5 @@
--- Write a SQL script that creates a trigger that resets the attribute valid_email
--- only when the email has been changed.
--- Context: Nothing related to MySQL, but perfect for user email validation -
--- distribute the logic to the database itself!
+-- script that creates an index idx_name_first_score on the table
+-- names and the first letter of name and the score
 
 DELIMITER $$ ;
 CREATE TRIGGER resets_valid_email BEFORE UPDATE ON users
