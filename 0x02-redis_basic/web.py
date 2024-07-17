@@ -4,28 +4,30 @@ requests module to obtain the HTML content of a particular URL and returns it.
 """
 import redis
 import requests
-from functools import wraps
 from typing import Callable
+from functools import wraps
 
 
-def track_get_page(fn: Callable) -> Callable:
-    """ Decorator for the get_page """
-    @wraps(fn)
+cache_client = redis.Redis()
+""" module-level REDIS instance"""
+
+
+def cache_data(func: Callable) -> Callable:
+    """ caches the fetched data output"""
+    @wraps(func)
     def output_cacher(url: str) -> str:
-        """ Wrapper to check if a url's data is cached and
-        tracks how many times get_page is called
-        """
-        cache_client = redis.Redis()
+        """ Wrapper function to cache output """
         cache_client.incr(f'count:{url}')
         cached_page = cache_client.get(f'{url}')
         if cached_page:
             return cached_page.decode('utf-8')
-        cache_client.set(f'{url}', fn(url), 10)
-        return fn(url)
+        cache_client.set(f'count:{url}', 0)
+        cache_client.setex(f'func(url):{url}', 10, func(url))
+        return func(url)
     return output_cacher
 
 
-@track_get_page
+@cache_data
 def get_page(url: str) -> str:
     """tracks request and returns it;s URL's contents after caching its respnse"""
     return requests.get(url).text
