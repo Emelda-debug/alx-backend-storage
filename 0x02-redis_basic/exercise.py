@@ -21,13 +21,17 @@ def count_calls(method: Callable) -> Callable:
 def call_history(method: Callable) -> Callable:
     """ decorator to store the history particular function"""
     @wraps(method)
-    def wrapper(self: Any, *args) -> str:
+    def wrapper_function(self: *args, **kwargs) -> str:
         """method and tracks its passed argument by storingthem to redis"""
-        self._redis.rpush(f'{method.__qualname__}:inputs', str(args))
-        output = method(self, *args)
-        self._redis.rpush(f'{method.__qualname__}:outputs', output)
+        in_key = '{}:inputs'.format(method.__qualname__)
+        out_key = '{}:outputs'.format(method.__qualname__)
+        if isinstance(self._redis, redis.Redis):
+            self._redis.rpush(in_key, str(args))
+        output = method(self, *args, **kwargs)
+        if isinstance(self._redis, redis.Redis):
+            self._redis.rpush(f'{method.__qualname__}:outputs', output)
         return output
-    return wrapper
+    return wrapper_function
 
 
 def replay(fn: Callable) -> None:
